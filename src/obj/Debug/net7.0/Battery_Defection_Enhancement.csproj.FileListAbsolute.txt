@@ -1,0 +1,15 @@
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/Battery_Defection_Enhancement
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/Battery_Defection_Enhancement.deps.json
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/Battery_Defection_Enhancement.runtimeconfig.json
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/Battery_Defection_Enhancement.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/Battery_Defection_Enhancement.pdb
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.GeneratedMSBuildEditorConfig.editorconfig
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.AssemblyInfoInputs.cache
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.AssemblyInfo.cs
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.csproj.CoreCompileInputs.cache
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.sourcelink.json
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/refint/Battery_Defection_Enhancement.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.pdb
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.genruntimeconfig.cache
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/ref/Battery_Defection_Enhancement.dll

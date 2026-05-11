@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "Battery_Defection_Enhancement/1.0.0": {
+        "runtime": {
+          "Battery_Defection_Enhancement.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Battery_Defection_Enhancement/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
