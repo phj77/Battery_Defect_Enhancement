@@ -13,3 +13,8 @@
 /home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.pdb
 /home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.genruntimeconfig.cache
 /home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/ref/Battery_Defection_Enhancement.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/config.json
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/StbImageSharp.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/bin/Debug/net7.0/StbImageWriteSharp.dll
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_Defection_Enhancement.csproj.AssemblyReference.cache
+/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/obj/Debug/net7.0/Battery_.45AA7B8C.Up2Date

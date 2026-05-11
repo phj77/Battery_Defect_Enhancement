@@ -1,0 +1,15 @@
+{
+  "SingleTasks": [
+    {
+      "InputPath": "/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/data/input/4/01_3072 x 2048_pos(1)_NG.hdr",
+      "OutputPath": "/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/data/test/4test_.png",
+      "Alpha": 0.9,
+      "Beta": 0.85,
+      "FftSolver": false,
+      "NewFattal": true
+    }
+  ],
+  "SweepTasks": [
+    
+  ]
+}

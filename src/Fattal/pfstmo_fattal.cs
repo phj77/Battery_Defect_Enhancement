@@ -80,11 +80,12 @@ namespace FattalToneMapping
                 b.Data[i] = MathF.Pow(bRatio, optSaturation) * lVal;
             });
 
+            float gamma = 1.0f;
             // 4. 후처리 (Post Processing)
             // 톤 매핑된 각 채널에 디스플레이 감마(2.2) 보정을 적용하고, 안전하게 [0, 1] 범위로 클램핑
-            PostProcessor.ApplyDisplayGamma(r, 2.2f);
-            PostProcessor.ApplyDisplayGamma(g, 2.2f);
-            PostProcessor.ApplyDisplayGamma(b, 2.2f);
+            PostProcessor.ApplyDisplayGamma(r, gamma);
+            PostProcessor.ApplyDisplayGamma(g, gamma);
+            PostProcessor.ApplyDisplayGamma(b, gamma);
 
             PostProcessor.Clamp(r);
             PostProcessor.Clamp(g);
