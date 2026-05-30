@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "NfAloxNxoC8=",
+  "dgSpecHash": "8UPLQzylv6g=",
   "success": true,
-  "projectFilePath": "/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/src/Battery_Defection_Enhancement.csproj",
+  "projectFilePath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\src\\Battery_Defection_Enhancement.csproj",
   "expectedPackageFiles": [
-    "/home/phj/.nuget/packages/stbimagesharp/2.30.15/stbimagesharp.2.30.15.nupkg.sha512",
-    "/home/phj/.nuget/packages/stbimagewritesharp/1.16.7/stbimagewritesharp.1.16.7.nupkg.sha512",
-    "/home/phj/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.20/microsoft.aspnetcore.app.ref.7.0.20.nupkg.sha512",
-    "/home/phj/.nuget/packages/microsoft.netcore.app.host.linux-x64/7.0.20/microsoft.netcore.app.host.linux-x64.7.0.20.nupkg.sha512",
-    "/home/phj/.nuget/packages/microsoft.netcore.app.ref/7.0.20/microsoft.netcore.app.ref.7.0.20.nupkg.sha512"
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\stbimagesharp\\2.30.15\\stbimagesharp.2.30.15.nupkg.sha512",
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\stbimagewritesharp\\1.16.7\\stbimagewritesharp.1.16.7.nupkg.sha512",
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\microsoft.netcore.app.ref\\7.0.20\\microsoft.netcore.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\7.0.20\\microsoft.windowsdesktop.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\7.0.20\\microsoft.aspnetcore.app.ref.7.0.20.nupkg.sha512",
+    "C:\\Users\\Park_HyoungJun\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\7.0.20\\microsoft.netcore.app.host.win-x64.7.0.20.nupkg.sha512"
   ],
   "logs": []
 }

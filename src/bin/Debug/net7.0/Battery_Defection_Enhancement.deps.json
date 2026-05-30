@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v7.0": {
       "Battery_Defection_Enhancement/1.0.0": {
         "dependencies": {
+          "SharpFFTW": "1.2.0",
           "StbImageSharp": "2.30.15",
           "StbImageWriteSharp": "1.16.7"
         },
@@ -28,6 +29,14 @@
           "lib/netstandard2.0/StbImageWriteSharp.dll": {
             "assemblyVersion": "1.16.7.0",
             "fileVersion": "1.16.7.0"
+          }
+        }
+      },
+      "SharpFFTW/1.2.0": {
+        "runtime": {
+          "SharpFFTW.dll": {
+            "assemblyVersion": "1.2.0.0",
+            "fileVersion": "1.2.0.0"
           }
         }
       }
@@ -52,6 +61,11 @@
       "sha512": "sha512-NF9kOxi0iS9VunklnRKgOpAWC2knCGKRjdy7RT6XAqYNyb7LQfyPHPdl4l1fJw7TFYKrGQzQOmK1XpBONC2MoA==",
       "path": "stbimagewritesharp/1.16.7",
       "hashPath": "stbimagewritesharp.1.16.7.nupkg.sha512"
+    },
+    "SharpFFTW/1.2.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

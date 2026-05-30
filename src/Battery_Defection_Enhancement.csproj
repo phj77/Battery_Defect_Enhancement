@@ -6,10 +6,20 @@
     <LangVersion>11.0</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
   <None Update="config.json">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="fftw3.dll">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="fftw3f.dll">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </None>
+  <None Update="fftw3l.dll">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
 </ItemGroup>
@@ -17,6 +27,10 @@
   <ItemGroup>
     <PackageReference Include="StbImageSharp" Version="2.30.15" />
     <PackageReference Include="StbImageWriteSharp" Version="1.16.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpFFTW\SharpFFTW\SharpFFTW.csproj" />
   </ItemGroup>
 
 </Project>

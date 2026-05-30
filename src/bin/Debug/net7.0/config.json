@@ -1,10 +1,10 @@
 {
   "SingleTasks": [
     {
-      "InputPath": "/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/data/input/4/01_3072 x 2048_pos(1)_NG.hdr",
-      "OutputPath": "/home/phj/LAB/Project/poor_battery_image_enhancement/Battery_Defect_Enhancement/data/test/4test_e.png",
+      "InputPath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\data\\input\\7\\03_3072 x 2048_pos(mid)_NG.hdr",
+      "OutputPath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\data\\test\\mt_test_7.png",
       "Alpha": 0.9,
-      "Beta": 0.8,
+      "Beta": 0.86,
       "FftSolver": false,
       "NewFattal": true
     }

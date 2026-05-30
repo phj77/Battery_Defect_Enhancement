@@ -9,12 +9,18 @@ using PdeSolver.Common;
 using StbImageSharp;
 using StbImageWriteSharp;
 
+using System;
+using System.Diagnostics; // Stopwatch를 사용하기 위해 필요
+using System.Threading;
+
 string basePath = AppDomain.CurrentDomain.BaseDirectory;
 string configPath = Path.Combine(basePath, "config.json");
 
+Stopwatch stopwatch = Stopwatch.StartNew();
+
 if (!File.Exists(configPath))
 {
-    Console.WriteLine($"설정 파일(config.json)을 찾을 수 없습니다. (탐색 경로: {configPath})");
+    Console.WriteLine($"cannof find config.json. (search path: {configPath})");
     return;
 }
 
@@ -63,23 +69,23 @@ if (config?.SweepTasks != null)
 
 if (allTasks.Count == 0)
 {
-    Console.WriteLine("실행할 작업이 없습니다.");
+    Console.WriteLine("no works to execute");
     return;
 }
 
-Console.WriteLine($"총 {allTasks.Count}개의 톤매핑 작업을 시작합니다...\n");
+Console.WriteLine($"start {allTasks.Count} number of tonemapping...\n");
 
 // 3. 작업 순차 실행
 foreach (var task in allTasks)
 {
     try
     {
-        Console.WriteLine($"[진행 중] {task.OutputPath} 생성 중... (Alpha:{task.Alpha}, Beta:{task.Beta})");
+        Console.WriteLine($"[progressing...] {task.OutputPath} generating... (Alpha:{task.Alpha}, Beta:{task.Beta})");
 
         // TODO: 실제 HDR 이미지 로드 로직 구현 필요 (StbImageSharp 등 사용)
         if (!LoadHdrImage(task.InputPath, out int width, out int height, out Array2Df r, out Array2Df g, out Array2Df b))
         {
-            Console.WriteLine($"  -> 이미지 로드 실패: {task.InputPath}");
+            Console.WriteLine($"  -> fail to load image: {task.InputPath}");
             continue;
         }
 
@@ -92,15 +98,20 @@ foreach (var task in allTasks)
 
         // TODO: 결과 이미지(LDR) 저장 로직 구현 필요
         SaveLdrImage(task.OutputPath, width, height, r, g, b);
-        Console.WriteLine($"  -> 완료!");
+        Console.WriteLine($"  -> complete!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"  -> [오류 발생] {ex.Message}");
+        Console.WriteLine($"  -> [error] {ex.Message}");
     }
 }
 
-Console.WriteLine("\n모든 실험이 종료되었습니다.");
+stopwatch.Stop();
+double seconds = stopwatch.Elapsed.TotalSeconds;
+Console.WriteLine($"execution time: {seconds:F4} s");
+Console.WriteLine("\nevery experiment over.");
+Console.WriteLine("\nprogram is over. press any button.");
+Console.ReadKey();
 
 
 // --- 실제 이미지 입출력 함수 ---

@@ -1,19 +1,13 @@
 using System;
 using System.Threading.Tasks;
-using PdeSolver.FFT;        // 변경된 네임스페이스 반영
-using PdeSolver.Multigrid;  // 변경된 네임스페이스 반영
+using PdeSolver.FFT;
+using PdeSolver.Multigrid;
 using PdeSolver.Common;
 
 namespace FattalToneMapping
 {
-    // 참고: Array2Df 클래스는 유틸리티 폴더 등에 단일 파일로 존재한다고 가정합니다.
-    // 만약 네임스페이스가 다를 경우 using 문을 추가해야 합니다.
-
     public static class TmoFattal02
     {
-        /// <summary>
-        /// 2x2 박스 필터를 사용하여 이미지 해상도를 절반으로 줄입니다 (Downsampling).
-        /// </summary>
         private static void DownSample(Array2Df A, Array2Df B)
         {
             int width = B.Cols;
@@ -31,9 +25,6 @@ namespace FattalToneMapping
             });
         }
 
-        /// <summary>
-        /// X축 및 Y축 분리형 필터를 사용하여 빠른 가우시안 블러(Gaussian Blur)를 적용합니다.
-        /// </summary>
         private static void GaussianBlur(Array2Df I, Array2Df L)
         {
             int width = I.Cols;
@@ -75,9 +66,6 @@ namespace FattalToneMapping
             });
         }
 
-        /// <summary>
-        /// 원본 이미지를 기반으로 가우시안 피라미드를 생성합니다.
-        /// </summary>
         private static void CreateGaussianPyramids(Array2Df H, Array2Df[] pyramids, int nlevels)
         {
             int width = H.Cols;
@@ -92,7 +80,7 @@ namespace FattalToneMapping
                 height /= 2;
                 pyramids[k] = new Array2Df(width, height);
                 DownSample(L, pyramids[k]);
-                
+
                 if (k < nlevels - 1)
                 {
                     L = new Array2Df(width, height); // 이전 L 참조 버리기
@@ -101,16 +89,12 @@ namespace FattalToneMapping
             }
         }
 
-        /// <summary>
-        /// 이미지의 그래디언트 크기를 계산하고, 평균 그래디언트 값을 반환합니다.
-        /// </summary>
         private static float CalculateGradients(Array2Df H, Array2Df G, int k)
         {
             int width = H.Cols;
             int height = H.Rows;
             float divider = MathF.Pow(2.0f, k + 1);
-            
-            // 병렬 처리 시 스레드 로컬 합계를 사용하기 위한 락 객체
+
             object lockObj = new object();
             double avgGrad = 0.0;
 
@@ -136,9 +120,6 @@ namespace FattalToneMapping
             return (float)(avgGrad / (width * height));
         }
 
-        /// <summary>
-        /// Nearest-neighbor 방식을 사용하여 이미지 해상도를 두 배로 늘립니다 (Upsampling).
-        /// </summary>
         private static void UpSample(Array2Df A, Array2Df B)
         {
             int width = B.Cols;
@@ -157,15 +138,12 @@ namespace FattalToneMapping
             });
         }
 
-        /// <summary>
-        /// 계층별 그래디언트를 기반으로 감쇠 행렬(FI Matrix)을 계산합니다.
-        /// </summary>
-        private static void CalculateFiMatrix(Array2Df FI, Array2Df[] gradients, float[] avgGrad, 
-                                              int nlevels, int detailLevel, float alfa, float beta, 
+        private static void CalculateFiMatrix(Array2Df FI, Array2Df[] gradients, float[] avgGrad,
+                                              int nlevels, int detailLevel, float alfa, float beta,
                                               float noise, bool newFattal)
         {
             Array2Df[] fi = new Array2Df[nlevels];
-            
+
             int width = gradients[nlevels - 1].Cols;
             int height = gradients[nlevels - 1].Rows;
             fi[nlevels - 1] = new Array2Df(width, height);
@@ -206,7 +184,7 @@ namespace FattalToneMapping
                 }
                 else
                 {
-                    fi[0] = FI; // 최종 결과는 인자로 받은 FI 배열에 저장
+                    fi[0] = FI;
                 }
 
                 if (k > 0 && newFattal)
@@ -217,9 +195,6 @@ namespace FattalToneMapping
             }
         }
 
-        /// <summary>
-        /// 하위, 상위 백분위수를 찾아 블랙/화이트 포인트를 클리핑하기 위한 헬퍼 함수
-        /// </summary>
         private static void FindMinMaxPercentile(float[] data, float cutMin, out float minVal, float cutMax, out float maxVal)
         {
             float[] sorted = (float[])data.Clone();
@@ -227,7 +202,7 @@ namespace FattalToneMapping
 
             int minIdx = (int)(sorted.Length * cutMin);
             int maxIdx = (int)(sorted.Length * cutMax);
-            
+
             minIdx = Math.Clamp(minIdx, 0, sorted.Length - 1);
             maxIdx = Math.Clamp(maxIdx, 0, sorted.Length - 1);
 
@@ -235,11 +210,8 @@ namespace FattalToneMapping
             maxVal = sorted[maxIdx];
         }
 
-        /// <summary>
-        /// Fattal 2002 톤 매핑 알고리즘의 메인 진입점입니다.
-        /// </summary>
-        public static void Process(int width, int height, Array2Df Y, Array2Df L, 
-                                   float alfa, float beta, float noise, bool newFattal, 
+        public static void Process(int width, int height, Array2Df Y, Array2Df L,
+                                   float alfa, float beta, float noise, bool newFattal,
                                    bool fftSolver, int detailLevel, Action<int> progressCallback)
         {
             const float blackPoint = 0.1f;
@@ -287,7 +259,7 @@ namespace FattalToneMapping
             Array2Df[] pyramids = new Array2Df[nlevels];
             pyramids[0] = H;
             CreateGaussianPyramids(H, pyramids, nlevels);
-            
+
             progressCallback?.Invoke(8);
 
             // 4. 그래디언트 피라미드 계산
@@ -358,8 +330,9 @@ namespace FattalToneMapping
             Array2Df U = new Array2Df(width, height);
             if (fftSolver)
             {
-                // 메모리 절약을 위해 Gx를 임시 버퍼 F_tr로 재사용 (C++ 구현과 동일)
-                PdeFftSolver.SolvePdeFft(DivG, U, Gx, false, progressCallback);
+                // 수정된 부분: Array2Df 인스턴스 대신 내부 Data(float[])와 width, height를 전달합니다.
+                // PdeFftSolver.SolvePdeFft 메서드 서명에 맞추어 인자를 구성했습니다.
+                PdeFftSolver.SolvePdeFft(DivG.Data, U.Data, Gx.Data, width, height, false, 0.007f);
             }
             else
             {
@@ -382,7 +355,7 @@ namespace FattalToneMapping
             // 10. 백분위수를 이용한 정규화 및 클리핑
             float cutMin = 0.01f * blackPoint;
             float cutMax = 1.0f - 0.01f * whitePoint;
-            
+
             FindMinMaxPercentile(L.Data, cutMin, out minLum, cutMax, out maxLum);
 
             Parallel.For(0, size, i =>
