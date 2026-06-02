@@ -1,5 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/" />
   <Folder Name="/src/">
     <Project Path="src/Battery_Defection_Enhancement.csproj" />
   </Folder>
+  <Project Path="SharpFFTW/SharpFFTW/SharpFFTW.csproj" />
 </Solution>

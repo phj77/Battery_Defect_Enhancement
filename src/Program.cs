@@ -13,10 +13,11 @@ using System;
 using System.Diagnostics; // Stopwatch를 사용하기 위해 필요
 using System.Threading;
 
+
 string basePath = AppDomain.CurrentDomain.BaseDirectory;
 string configPath = Path.Combine(basePath, "config.json");
 
-Stopwatch stopwatch = Stopwatch.StartNew();
+GlobalTimer.Stopwatch.Start();
 
 if (!File.Exists(configPath))
 {
@@ -96,8 +97,19 @@ foreach (var task in allTasks)
             task.NewFattal, task.FftSolver, task.DetailLevel
         );
 
+
+        Console.WriteLine($"makingintensity range [0,1] to [0,255] start: {GlobalTimer.ElapsedSeconds:F2}s");
+        // 0~1 사이의 Float 값을 0~255 사이의 Byte 픽셀 데이터로 변환
+        byte[] pixels = new byte[width * height * 3];
+        for (int i = 0; i < width * height; i++)
+        {
+            pixels[i * 3 + 0] = (byte)Math.Clamp(r.Data[i] * 255f, 0, 255);
+            pixels[i * 3 + 1] = (byte)Math.Clamp(g.Data[i] * 255f, 0, 255);
+            pixels[i * 3 + 2] = (byte)Math.Clamp(b.Data[i] * 255f, 0, 255);
+        }
+
         // TODO: 결과 이미지(LDR) 저장 로직 구현 필요
-        SaveLdrImage(task.OutputPath, width, height, r, g, b);
+        SaveLdrImage(task.OutputPath, width, height, pixels);
         Console.WriteLine($"  -> complete!");
     }
     catch (Exception ex)
@@ -106,8 +118,8 @@ foreach (var task in allTasks)
     }
 }
 
-stopwatch.Stop();
-double seconds = stopwatch.Elapsed.TotalSeconds;
+GlobalTimer.Stopwatch.Stop();
+double seconds = GlobalTimer.ElapsedSeconds;
 Console.WriteLine($"execution time: {seconds:F4} s");
 Console.WriteLine("\nevery experiment over.");
 Console.WriteLine("\nprogram is over. press any button.");
@@ -118,6 +130,8 @@ Console.ReadKey();
 
 bool LoadHdrImage(string path, out int w, out int h, out Array2Df r, out Array2Df g, out Array2Df b)
 {
+    Console.WriteLine($"image loading start: {GlobalTimer.ElapsedSeconds:F2}s");
+
     w = 0; h = 0; r = null; g = null; b = null;
     
     if (!File.Exists(path)) return false;
@@ -140,11 +154,15 @@ bool LoadHdrImage(string path, out int w, out int h, out Array2Df r, out Array2D
         b.Data[i] = image.Data[i * 3 + 2];
     }
 
+    Console.WriteLine($"image loaded over at: {GlobalTimer.ElapsedSeconds:F2}s");
+
     return true;
 }
 
-void SaveLdrImage(string path, int w, int h, Array2Df r, Array2Df g, Array2Df b)
+void SaveLdrImage(string path, int w, int h, byte[] pixels)
 {
+    Console.WriteLine($"image saving start: {GlobalTimer.ElapsedSeconds:F2}s");
+
     // 출력 폴더가 없다면 생성
     string directory = Path.GetDirectoryName(path);
     if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -152,17 +170,19 @@ void SaveLdrImage(string path, int w, int h, Array2Df r, Array2Df g, Array2Df b)
         Directory.CreateDirectory(directory);
     }
 
-    // 0~1 사이의 Float 값을 0~255 사이의 Byte 픽셀 데이터로 변환
-    byte[] pixels = new byte[w * h * 3];
-    for (int i = 0; i < w * h; i++)
-    {
-        pixels[i * 3 + 0] = (byte)Math.Clamp(r.Data[i] * 255f, 0, 255);
-        pixels[i * 3 + 1] = (byte)Math.Clamp(g.Data[i] * 255f, 0, 255);
-        pixels[i * 3 + 2] = (byte)Math.Clamp(b.Data[i] * 255f, 0, 255);
-    }
-
     // PNG 파일로 저장
     using Stream stream = File.OpenWrite(path);
     ImageWriter writer = new ImageWriter();
     writer.WritePng(pixels, w, h, StbImageWriteSharp.ColorComponents.RedGreenBlue, stream);
+
+    Console.WriteLine($"image saved over at: {GlobalTimer.ElapsedSeconds:F2}s");
+}
+
+public static class GlobalTimer
+{
+    // 프로그램 전역에서 공유할 고정밀 스톱워치
+    public static readonly Stopwatch Stopwatch = new Stopwatch();
+
+    // 편리한 사용을 위해 초 단위 누적 시간을 반환하는 프로퍼티
+    public static double ElapsedSeconds => Stopwatch.Elapsed.TotalSeconds;
 }

@@ -21,6 +21,8 @@ namespace FattalToneMapping
                                  bool newFattal, bool fftSolver, int detailLevel, 
                                  Action<int> progressCallback = null)
         {
+            Console.WriteLine($"PfsTmo start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             if (r == null || g == null || b == null)
             {
                 throw new ArgumentNullException("RGB 채널 중 하나 이상이 누락되었습니다.");
@@ -63,6 +65,8 @@ namespace FattalToneMapping
             {
                 throw new Exception("Tonemapping Failed!", ex);
             }
+
+            Console.WriteLine($"Tmo fattal over at: {GlobalTimer.ElapsedSeconds:F2}s");
 
             // 3. 색상 재구성 (Color Reconstruction)
             // 압축된 휘도(L)와 원본 휘도(Yr)의 비율을 바탕으로 RGB 채널을 복원하고 채도(Saturation)를 조절

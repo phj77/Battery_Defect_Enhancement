@@ -214,6 +214,8 @@ namespace FattalToneMapping
                                    float alfa, float beta, float noise, bool newFattal,
                                    bool fftSolver, int detailLevel, Action<int> progressCallback)
         {
+            Console.WriteLine($"Tmo_fattal start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             const float blackPoint = 0.1f;
             const float whitePoint = 0.5f;
             const float gamma = 1.0f;
@@ -246,6 +248,8 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(4);
 
+            Console.WriteLine($"Creating Gaussian pyramid start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 3. 가우시안 피라미드 생성
             int mins = Math.Min(width, height);
             int nlevels = 0;
@@ -262,6 +266,8 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(8);
 
+            Console.WriteLine($"Creating gradient pyramid start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 4. 그래디언트 피라미드 계산
             Array2Df[] gradients = new Array2Df[nlevels];
             float[] avgGrad = new float[nlevels];
@@ -273,11 +279,15 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(12);
 
+            Console.WriteLine($"Creating FI matrix start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 5. 감쇠 매트릭스(FI) 계산
             Array2Df FI = new Array2Df(width, height);
             CalculateFiMatrix(FI, gradients, avgGrad, nlevels, detailLevel, alfa, beta, noise, newFattal);
 
             progressCallback?.Invoke(16);
+
+            Console.WriteLine($"Creating attenuated gradient pyramid start: {GlobalTimer.ElapsedSeconds:F2}s");
 
             // 6. 감쇠된 그래디언트 필드 생성
             Array2Df Gx = new Array2Df(width, height);
@@ -306,6 +316,8 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(18);
 
+            Console.WriteLine($"Calculating Divergence start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 7. Divergence 계산
             Array2Df DivG = new Array2Df(width, height);
             Parallel.For(0, height, y =>
@@ -326,6 +338,8 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(20);
 
+            Console.WriteLine($"PDE solving start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 8. 포아송 방정식 풀이 (PDE Solver)
             Array2Df U = new Array2Df(width, height);
             if (fftSolver)
@@ -341,6 +355,8 @@ namespace FattalToneMapping
 
             progressCallback?.Invoke(90);
 
+            Console.WriteLine($"Reconstructing image from exponential domain start: {GlobalTimer.ElapsedSeconds:F2}s");
+
             // 9. 압축된 이미지 복원 (지수 함수)
             Parallel.For(0, height, y =>
             {
@@ -351,6 +367,8 @@ namespace FattalToneMapping
             });
 
             progressCallback?.Invoke(95);
+
+            Console.WriteLine($"clipping start: {GlobalTimer.ElapsedSeconds:F2}s");
 
             // 10. 백분위수를 이용한 정규화 및 클리핑
             float cutMin = 0.01f * blackPoint;
