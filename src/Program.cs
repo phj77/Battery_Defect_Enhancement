@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using FattalToneMapping;
 using FattalToneMapping.Config;
@@ -42,26 +43,54 @@ if (config?.SweepTasks != null)
 {
     foreach (var sweep in config.SweepTasks)
     {
-        foreach (var a in sweep.Alphas)
+        // 입력 경로가 폴더인지 파일인지 확인
+        string[] targetFiles;
+        if (Directory.Exists(sweep.InputPath))
         {
-            foreach (var b in sweep.Betas)
+            // 폴더 내 모든 파일을 가져옵니다. 특정 확장자(예: .hdr)만 필요하다면 
+            // Directory.GetFiles(sweep.InputPath, "*.hdr") 로 변경하십시오.
+            targetFiles = Directory.GetFiles(sweep.InputPath);
+        }
+        else if (File.Exists(sweep.InputPath))
+        {
+            // 단일 파일일 경우
+            targetFiles = new[] { sweep.InputPath };
+        }
+        else
+        {
+            Console.WriteLine($"[warning] path not found: {sweep.InputPath}");
+            continue;
+        }
+
+        // 대상 파일 각각에 대해 파라미터 조합 생성
+        foreach (var file in targetFiles)
+        {
+            // 파일명 덮어쓰기 방지를 위해 원본 파일명을 추출
+            string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+
+            foreach (var a in sweep.Alphas)
             {
-                foreach (var s in sweep.Saturations)
+                foreach (var b in sweep.Betas)
                 {
-                    // 파라미터 값이 들어간 파일명 자동 생성 (예: memorial_test_a0.1_b0.8_s0.6.png)
-                    string outName = $"{sweep.OutputPrefix}_a{a}_b{b}_s{s}.png";
-                    
-                    allTasks.Add(new TonemappingTask(
-                        InputPath: sweep.InputPath,
-                        OutputPath: outName,
-                        Alpha: a,
-                        Beta: b,
-                        Saturation: s,
-                        Noise: sweep.Noise,
-                        NewFattal: sweep.NewFattal,
-                        FftSolver: sweep.FftSolver,
-                        DetailLevel: sweep.DetailLevel
-                    ));
+                    foreach (var s in sweep.Saturations)
+                    {
+                        // OutputPrefix, 원본 파일명, 파라미터를 조합하여 결과 파일명 생성
+                        // 예: prefix_memorial_a0.1_b0.8_s0.6.png
+                        string outPrefix = string.IsNullOrEmpty(sweep.OutputPrefix) ? "" : $"{sweep.OutputPrefix}_";
+                        string outName = $"{outPrefix}{fileNameWithoutExt}_a{a}_b{b}_s{s}.png";
+
+                        allTasks.Add(new TonemappingTask(
+                            InputPath: file, // 순회 중인 개별 파일 경로 사용
+                            OutputPath: outName,
+                            Alpha: a,
+                            Beta: b,
+                            Saturation: s,
+                            Noise: sweep.Noise,
+                            NewFattal: sweep.NewFattal,
+                            FftSolver: sweep.FftSolver,
+                            DetailLevel: sweep.DetailLevel
+                        ));
+                    }
                 }
             }
         }

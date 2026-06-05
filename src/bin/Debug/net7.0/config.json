@@ -2,7 +2,7 @@
   "SingleTasks": [
     {
       "InputPath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\data\\input\\4\\01_3072 x 2048_pos(1)_NG.hdr",
-      "OutputPath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\data\\test\\fft_test_4_02.png",
+      "OutputPath": "C:\\Users\\Park_HyoungJun\\LAB\\mission\\poor_battery_enhancement\\src\\Battery_Defect_Enhancement\\data\\test\\tmp\\testing_clip.png",
       "Alpha": 0.9,
       "Beta": 0.86,
       "FftSolver": true,

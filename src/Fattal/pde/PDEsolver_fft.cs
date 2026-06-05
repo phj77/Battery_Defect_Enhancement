@@ -76,6 +76,16 @@ namespace PdeSolver.FFT
         /// </summary>
         private static void TransformNormal2Ev(float[] A, float[] T, int width, int height)
         {
+            // 1. 스레드 환경 초기화 (성공 시 0이 아닌 값 반환)
+            if (NativeMethods.fftwf_init_threads() == 0)
+            {
+                throw new Exception("fail to FFTW initialization!");
+            }
+
+            // 2. 사용할 CPU 스레드 수 지정 (12~ is optimal for local pc)
+            NativeMethods.fftwf_plan_with_nthreads(14);
+
+            Console.WriteLine($"fft plan start=================: {GlobalTimer.ElapsedSeconds:F2}s");
             using (var inArray = new RealArray(A))
             using (var outArray = new RealArray(T.Length))
             using (var plan = Plan.Create2(height, width, inArray, outArray, Transform.REDFT00, Transform.REDFT00, Options.Estimate))
@@ -83,6 +93,7 @@ namespace PdeSolver.FFT
                 plan.Execute();
                 outArray.CopyTo(T);
             }
+            Console.WriteLine($"fft plan over=================: {GlobalTimer.ElapsedSeconds:F2}s");
 
             float scale = 1.0f / ((height - 1) * (width - 1));
 
@@ -138,6 +149,7 @@ namespace PdeSolver.FFT
                 A[rowOffset + (width - 1)] *= 0.5f;
             }
 
+            Console.WriteLine($"fft plan start=================: {GlobalTimer.ElapsedSeconds:F2}s");
             using (var inArray = new RealArray(A))
             using (var outArray = new RealArray(T.Length))
             using (var plan = Plan.Create2(height, width, inArray, outArray, Transform.REDFT00, Transform.REDFT00, Options.Estimate))
@@ -145,6 +157,7 @@ namespace PdeSolver.FFT
                 plan.Execute();
                 outArray.CopyTo(T);
             }
+            Console.WriteLine($"fft plan over=================: {GlobalTimer.ElapsedSeconds:F2}s");
         }
 
         /// <summary>
@@ -159,15 +172,18 @@ namespace PdeSolver.FFT
 
             if (adjustBound)
             {
+                Console.WriteLine($"Making compatible boundary start: {GlobalTimer.ElapsedSeconds:F2}s");
                 MakeCompatibleBoundary(F, width, height);
             }
 
+            Console.WriteLine($"Transform Divergence to eigenvector space start: {GlobalTimer.ElapsedSeconds:F2}s");
             // 1. F를 고유벡터 공간으로 변환
             TransformNormal2Ev(F, F_tr, width, height);
 
             float[] l1 = GetLambda(height);
             float[] l2 = GetLambda(width);
 
+            Console.WriteLine($"calculate in eigenvector space start: {GlobalTimer.ElapsedSeconds:F2}s");
             // 2. 고유벡터 공간에서의 계산 및 High-Pass Filter 적용
             if (hpfSigma > 0.0f)
             {
@@ -218,9 +234,11 @@ namespace PdeSolver.FFT
             // 상수를 상쇄하기 위해 설정
             F_tr[0] = 0f;
 
+            Console.WriteLine($"Inverse transform to time domain start: {GlobalTimer.ElapsedSeconds:F2}s");
             // 3. F_tr을 일반 공간으로 변환하여 U 도출
             TransformEv2Normal(F_tr, U, width, height);
 
+            Console.WriteLine($"subtract maximum value: {GlobalTimer.ElapsedSeconds:F2}s");
             // 4. 결과값에서 최대값을 찾아 빼줌 (로그 공간 연산의 수치적 안정성을 위함)
             float max = float.MinValue;
             for (int i = 0; i < U.Length; i++)

@@ -1132,6 +1132,38 @@
             <param name="kind">An array containing the kind of real-to-real transform to compute along each dimension.</param>
             <param name="flags">Flags that specify the behavior of the planner.</param>
         </member>
+        <member name="M:SharpFFTW.Single.NativeMethods.fftwf_init_threads">
+            <summary>
+            Perform any one-time initialization required to use threads.
+            </summary>
+            <returns>Returns zero if there was some error and a non-zero value otherwise.</returns>
+        </member>
+        <member name="M:SharpFFTW.Single.NativeMethods.fftwf_plan_with_nthreads(System.Int32)">
+            <summary>
+            Sets number of threads for FFTW to use.
+            </summary>
+            <param name="nthreads">The number of threads.</param>
+        </member>
+        <member name="M:SharpFFTW.Single.NativeMethods.fftwf_planner_nthreads">
+            <summary>
+            Determines the current number of threads that the planner can use.
+            </summary>
+            <returns>Number of threads that the planner can use.</returns>
+        </member>
+        <member name="M:SharpFFTW.Single.NativeMethods.fftwf_cleanup_threads">
+            <summary>
+            Cleanup all memory and other resources allocated internally by FFTW.
+            </summary>
+            <remarks>
+            Much like the fftw_cleanup() function except that it also gets rid of threads-related data.
+            You must not execute any previously created plans after calling this function.
+            </remarks>
+        </member>
+        <member name="M:SharpFFTW.Single.NativeMethods.fftwf_make_planner_thread_safe">
+            <summary>
+            See http://www.fftw.org/fftw3_doc/Thread-safety.html
+            </summary>
+        </member>
         <member name="M:SharpFFTW.Single.NativeMethods.fftwf_flops(System.IntPtr,System.Double@,System.Double@,System.Double@)">
             <summary>
             Returns (approximately) the number of flops used by a certain plan.

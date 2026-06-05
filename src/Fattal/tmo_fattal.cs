@@ -1,8 +1,9 @@
-using System;
-using System.Threading.Tasks;
+using PdeSolver.Common;
 using PdeSolver.FFT;
 using PdeSolver.Multigrid;
-using PdeSolver.Common;
+using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace FattalToneMapping
 {
@@ -195,19 +196,110 @@ namespace FattalToneMapping
             }
         }
 
-        private static void FindMinMaxPercentile(float[] data, float cutMin, out float minVal, float cutMax, out float maxVal)
+        public static void FindMinMaxPercentile(float[] data, float cutMin, out float minVal, float cutMax, out float maxVal)
         {
-            float[] sorted = (float[])data.Clone();
-            Array.Sort(sorted);
+            int length = data.Length;
+            if (length == 0)
+            {
+                minVal = maxVal = 0;
+                return;
+            }
 
-            int minIdx = (int)(sorted.Length * cutMin);
-            int maxIdx = (int)(sorted.Length * cutMax);
+            // 1. 병렬 처리로 최솟값 및 최댓값 탐색
+            float globalMin = float.MaxValue;
+            float globalMax = float.MinValue;
+            object minMaxLock = new object();
 
-            minIdx = Math.Clamp(minIdx, 0, sorted.Length - 1);
-            maxIdx = Math.Clamp(maxIdx, 0, sorted.Length - 1);
+            Parallel.ForEach(Partitioner.Create(0, length),
+                () => new { Min = float.MaxValue, Max = float.MinValue },
+                (range, loopState, localState) =>
+                {
+                    float localMin = localState.Min;
+                    float localMax = localState.Max;
 
-            minVal = sorted[minIdx];
-            maxVal = sorted[maxIdx];
+                    // 루프 내 조건 분기를 줄여 명령어 파이프라인 효율 극대화
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        float val = data[i];
+                        if (val < localMin) localMin = val;
+                        if (val > localMax) localMax = val;
+                    }
+                    return new { Min = localMin, Max = localMax };
+                },
+                localState =>
+                {
+                    lock (minMaxLock)
+                    {
+                        if (localState.Min < globalMin) globalMin = localState.Min;
+                        if (localState.Max > globalMax) globalMax = localState.Max;
+                    }
+                });
+
+            if (globalMin >= globalMax)
+            {
+                minVal = maxVal = globalMin;
+                return;
+            }
+
+            // 2. 스레드 로컬 히스토그램 생성 및 병합
+            const int binCount = 65536; // 16-bit 정밀도. 이미지 처리에 충분한 해상도.
+            float rangeSpan = globalMax - globalMin;
+            float invRange = (binCount - 1) / rangeSpan;
+
+            int[] globalHistogram = new int[binCount];
+
+            Parallel.ForEach(Partitioner.Create(0, length),
+                () => new int[binCount],
+                (range, loopState, localHistogram) =>
+                {
+                    for (int i = range.Item1; i < range.Item2; i++)
+                    {
+                        int bin = (int)((data[i] - globalMin) * invRange);
+                        localHistogram[bin]++;
+                    }
+                    return localHistogram;
+                },
+                localHistogram =>
+                {
+                    // 각 스레드의 로컬 히스토그램을 전역 히스토그램으로 병합
+                    lock (globalHistogram)
+                    {
+                        for (int i = 0; i < binCount; i++)
+                        {
+                            globalHistogram[i] += localHistogram[i];
+                        }
+                    }
+                });
+
+            // 3. 누적합을 이용한 백분위수 인덱스 계산
+            int minTarget = (int)(length * cutMin);
+            int maxTarget = (int)(length * cutMax);
+
+            minTarget = Math.Clamp(minTarget, 0, length - 1);
+            maxTarget = Math.Clamp(maxTarget, 0, length - 1);
+
+            int cumulativeCount = 0;
+            int minBin = -1;
+            int maxBin = -1;
+
+            for (int i = 0; i < binCount; i++)
+            {
+                cumulativeCount += globalHistogram[i];
+
+                if (minBin == -1 && cumulativeCount > minTarget)
+                {
+                    minBin = i;
+                }
+                if (maxBin == -1 && cumulativeCount >= maxTarget)
+                {
+                    maxBin = i;
+                    break; // 타겟 도달 시 즉시 순회 종료
+                }
+            }
+
+            // 4. Bin 인덱스를 실제 float 값으로 역산
+            minVal = globalMin + (minBin / (float)(binCount - 1)) * rangeSpan;
+            maxVal = globalMin + (maxBin / (float)(binCount - 1)) * rangeSpan;
         }
 
         public static void Process(int width, int height, Array2Df Y, Array2Df L,

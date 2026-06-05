@@ -10,10 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="fftw3.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
   <None Update="config.json">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </None>
-  <None Update="fftw3.dll">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </None>
   <None Update="fftw3f.dll">

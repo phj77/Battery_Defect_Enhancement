@@ -1,5 +1,5 @@
 // The code in this file is provided courtesy of Tamas Szalay. Some functionality has been added.
-
+#define USE_THREADS
 using System;
 using System.Runtime.InteropServices;
 

@@ -18,7 +18,6 @@ C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\obj\Debug\net7.0\Battery_Defection_Enhancement.pdb
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\obj\Debug\net7.0\Battery_Defection_Enhancement.genruntimeconfig.cache
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\obj\Debug\net7.0\ref\Battery_Defection_Enhancement.dll
-C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\bin\Debug\net7.0\fftw3.dll
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\bin\Debug\net7.0\fftw3f.dll
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\bin\Debug\net7.0\fftw3l.dll
 C:\Users\Park_HyoungJun\LAB\mission\poor_battery_enhancement\src\Battery_Defect_Enhancement\src\bin\Debug\net7.0\SharpFFTW.dll

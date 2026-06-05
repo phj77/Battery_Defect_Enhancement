@@ -63,6 +63,7 @@ namespace FattalToneMapping
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 throw new Exception("Tonemapping Failed!", ex);
             }
 
