@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Battery_Defection_Enhancement")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b77bbd5251fea24b43fc6be5d7eecf7fef5a0e72")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+611d1d6c2b13ec54fdcdc3e69065c248377ba591")]
 [assembly: System.Reflection.AssemblyProductAttribute("Battery_Defection_Enhancement")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Battery_Defection_Enhancement")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

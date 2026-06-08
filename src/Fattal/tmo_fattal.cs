@@ -4,6 +4,7 @@ using PdeSolver.Multigrid;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace FattalToneMapping
 {
@@ -72,20 +73,28 @@ namespace FattalToneMapping
             int width = H.Cols;
             int height = H.Rows;
 
-            Array2Df L = new Array2Df(width, height);
-            GaussianBlur(pyramids[0], L);
+            // 가비지 컬렉터(GC) 부하 방지를 위한 임시 버퍼 배열 사전 할당
+            Array2Df[] L_buffers = new Array2Df[nlevels];
+            L_buffers[0] = new Array2Df(width, height);
+
+            int tempWidth = width;
+            int tempHeight = height;
+            for (int k = 1; k < nlevels; k++)
+            {
+                tempWidth /= 2;
+                tempHeight /= 2;
+                L_buffers[k] = new Array2Df(tempWidth, tempHeight);
+            }
+
+            GaussianBlur(pyramids[0], L_buffers[0]);
 
             for (int k = 1; k < nlevels; k++)
             {
-                width /= 2;
-                height /= 2;
-                pyramids[k] = new Array2Df(width, height);
-                DownSample(L, pyramids[k]);
+                DownSample(L_buffers[k - 1], pyramids[k]);
 
                 if (k < nlevels - 1)
                 {
-                    L = new Array2Df(width, height); // 이전 L 참조 버리기
-                    GaussianBlur(pyramids[k], L);
+                    GaussianBlur(pyramids[k], L_buffers[k]);
                 }
             }
         }
@@ -139,53 +148,58 @@ namespace FattalToneMapping
             });
         }
 
-        private static void CalculateFiMatrix(Array2Df FI, Array2Df[] gradients, float[] avgGrad,
+        private static void CalculateFiMatrix(Array2Df FI, Array2Df[] gradients, float[] avgGrad, 
                                               int nlevels, int detailLevel, float alfa, float beta,
                                               float noise, bool newFattal)
         {
+            // 1. 메모리 사전 할당 (루프 내부의 동적 할당 GC 부하 제거)
             Array2Df[] fi = new Array2Df[nlevels];
+            fi[0] = FI; // 가장 하위 레벨은 전달받은 FI 배열을 재사용
+            for (int k = 1; k < nlevels; k++)
+            {
+                fi[k] = new Array2Df(gradients[k].Cols, gradients[k].Rows);
+            }
 
-            int width = gradients[nlevels - 1].Cols;
-            int height = gradients[nlevels - 1].Rows;
-            fi[nlevels - 1] = new Array2Df(width, height);
+            int topSize = fi[nlevels - 1].Cols * fi[nlevels - 1].Rows;
 
+            // 2. 1차원 배열 순회를 통한 캐시 지역성 극대화
             if (newFattal)
             {
-                for (int k = 0; k < width * height; k++) fi[nlevels - 1].Data[k] = 1.0f;
+                Parallel.For(0, topSize, i => fi[nlevels - 1].Data[i] = 1.0f);
             }
+
+            // 3. 루프 불변식 사전 계산
+            float exponent = beta - 1.0f;
 
             for (int k = nlevels - 1; k >= 0; k--)
             {
-                width = gradients[k].Cols;
-                height = gradients[k].Rows;
+                int size = gradients[k].Cols * gradients[k].Rows;
 
                 if (k >= detailLevel || k == nlevels - 1 || !newFattal)
                 {
-                    Parallel.For(0, height, y =>
+                    // 나눗셈을 최소화하기 위해 루프 외부에서 역수 계산
+                    float a = alfa * avgGrad[k];
+                    float invA = 1.0f / a;
+
+                    // 4. 루프 언스위칭 (if (newFattal) 분기를 루프 외부로 추출)
+                    if (newFattal)
                     {
-                        for (int x = 0; x < width; x++)
+                        Parallel.For(0, size, i =>
                         {
-                            float grad = MathF.Max(gradients[k][x, y], 1e-4f);
-                            float a = alfa * avgGrad[k];
-                            float value = MathF.Pow((grad + noise) / a, beta - 1.0f);
-
-                            if (newFattal)
-                                fi[k][x, y] *= value;
-                            else
-                                fi[k][x, y] = value;
-                        }
-                    });
-                }
-
-                if (k > 1)
-                {
-                    width = gradients[k - 1].Cols;
-                    height = gradients[k - 1].Rows;
-                    fi[k - 1] = new Array2Df(width, height);
-                }
-                else
-                {
-                    fi[0] = FI;
+                            float grad = MathF.Max(gradients[k].Data[i], 1e-4f);
+                            float value = MathF.Pow((grad + noise) * invA, exponent);
+                            fi[k].Data[i] *= value;
+                        });
+                    }
+                    else
+                    {
+                        Parallel.For(0, size, i =>
+                        {
+                            float grad = MathF.Max(gradients[k].Data[i], 1e-4f);
+                            float value = MathF.Pow((grad + noise) * invA, exponent);
+                            fi[k].Data[i] = value;
+                        });
+                    }
                 }
 
                 if (k > 0 && newFattal)
@@ -318,31 +332,79 @@ namespace FattalToneMapping
             int msize = fftSolver ? 8 : 32;
             int size = width * height;
 
-            // 1. 최대/최소 루미넌스 탐색
-            float minLum = Y.Data[0];
-            float maxLum = Y.Data[0];
+            // 1. 최대/최소 루미넌스 탐색 (SIMD 및 멀티스레딩 적용)
+            float minLum = float.MaxValue;
+            float maxLum = float.MinValue;
+            object minMaxLock = new object();
 
-            for (int i = 0; i < size; i++)
-            {
-                if (Y.Data[i] < minLum) minLum = Y.Data[i];
-                if (Y.Data[i] > maxLum) maxLum = Y.Data[i];
-            }
-
-            // 2. 로그 도메인으로 변환 (H)
-            Array2Df H = new Array2Df(width, height);
-            Parallel.For(0, height, y =>
-            {
-                for (int x = 0; x < width; x++)
+            Parallel.ForEach(Partitioner.Create(0, size),
+                () => new { Min = float.MaxValue, Max = float.MinValue },
+                (range, loopState, localState) =>
                 {
-                    H[x, y] = MathF.Log(100f * Y[x, y] / maxLum + 1e-4f);
-                }
+                    float localMin = localState.Min;
+                    float localMax = localState.Max;
+                    int i = range.Item1;
+
+                    // SIMD 하드웨어 가속 지원 시 벡터화 처리
+                    if (Vector.IsHardwareAccelerated)
+                    {
+                        int vectorSize = Vector<float>.Count;
+                        int limit = range.Item2 - vectorSize;
+
+                        var vMin = new Vector<float>(localMin);
+                        var vMax = new Vector<float>(localMax);
+
+                        for (; i <= limit; i += vectorSize)
+                        {
+                            var vData = new Vector<float>(Y.Data, i);
+                            vMin = Vector.Min(vMin, vData);
+                            vMax = Vector.Max(vMax, vData);
+                        }
+
+                        // 벡터 내 최솟값/최댓값 추출
+                        for (int j = 0; j < vectorSize; j++)
+                        {
+                            if (vMin[j] < localMin) localMin = vMin[j];
+                            if (vMax[j] > localMax) localMax = vMax[j];
+                        }
+                    }
+
+                    // SIMD 처리 후 남은 자투리 요소 처리
+                    for (; i < range.Item2; i++)
+                    {
+                        float val = Y.Data[i];
+                        if (val < localMin) localMin = val;
+                        if (val > localMax) localMax = val;
+                    }
+
+                    return new { Min = localMin, Max = localMax };
+                },
+                localState =>
+                {
+                    lock (minMaxLock)
+                    {
+                        if (localState.Min < minLum) minLum = localState.Min;
+                        if (localState.Max > maxLum) maxLum = localState.Max;
+                    }
+                });
+
+            // 2. 로그 도메인으로 변환 (H) - 1차원 배열 순회 및 루프 불변식 분리
+            Array2Df H = new Array2Df(width, height);
+
+            // 반복문 내부 나눗셈 연산을 제거하기 위해 상수화
+            float multiplier = 100f / maxLum;
+
+            // 2차원 순회가 아닌 1차원 순회로 메모리 지역성 및 캐시 효율 극대화
+            Parallel.For(0, size, i =>
+            {
+                H.Data[i] = MathF.Log(Y.Data[i] * multiplier + 1e-4f);
             });
 
             progressCallback?.Invoke(4);
 
             Console.WriteLine($"Creating Gaussian pyramid start: {GlobalTimer.ElapsedSeconds:F2}s");
 
-            // 3. 가우시안 피라미드 생성
+            // 3. 가우시안 피라미드 생성 (메모리 사전 할당 적용)  ====> 속도 개선 안됨@@@@@@@@@@@@@@@@@@@@@@
             int mins = Math.Min(width, height);
             int nlevels = 0;
             while (mins >= msize)
@@ -354,6 +416,17 @@ namespace FattalToneMapping
 
             Array2Df[] pyramids = new Array2Df[nlevels];
             pyramids[0] = H;
+
+            // CreateGaussianPyramids 내부에서 재할당되지 않도록 피라미드 레벨을 미리 할당
+            int currentWidth = width;
+            int currentHeight = height;
+            for (int k = 1; k < nlevels; k++)
+            {
+                currentWidth /= 2;
+                currentHeight /= 2;
+                pyramids[k] = new Array2Df(currentWidth, currentHeight);
+            }
+
             CreateGaussianPyramids(H, pyramids, nlevels);
 
             progressCallback?.Invoke(8);
